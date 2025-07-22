@@ -1,0 +1,125 @@
+name: Bug Report
+description: File a bug report to help us improve EchoTube
+title: "[Bug]: "
+labels: ["bug"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug! 🐛
+        
+        Please fill out the information below to help us understand and fix the issue.
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Pre-submission Checklist
+      description: Please confirm the following before submitting your bug report
+      options:
+        - label: I have searched existing issues and this hasn't been reported before
+          required: true
+        - label: I am using the latest version of EchoTube
+          required: true
+        - label: I have tested with `ET_TEST_MODE=true` to isolate the issue
+          required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear and concise description of what the bug is
+      placeholder: Tell us what you see!
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+      placeholder: Tell us what you expected!
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps to Reproduce
+      description: Steps to reproduce the behavior
+      placeholder: |
+        1. Set environment variables '...'
+        2. Start EchoTube with '...'
+        3. Wait for '...'
+        4. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: configuration
+    attributes:
+      label: Configuration (sanitized)
+      description: Your environment variables (REMOVE webhook URLs and sensitive data)
+      render: yaml
+      placeholder: |
+        ET_CHANNEL_IDS: "UCexample1,UCexample2"
+        ET_KEYWORDS: "minecraft,gaming"
+        ET_MATCH_TYPE: "any"
+        ET_POLL_INTERVAL_SECONDS: 300
+        ET_LOG_LEVEL: "DEBUG"
+        ET_TEST_MODE: "false"
+
+  - type: dropdown
+    id: deployment-method
+    attributes:
+      label: How are you running EchoTube?
+      options:
+        - Docker (docker run)
+        - Docker Compose
+        - Direct Node.js
+        - Other (please specify)
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment Information
+      description: Information about your environment
+      placeholder: |
+        - OS: [e.g. Ubuntu 22.04, Windows 11, macOS 13]
+        - Docker Version: [e.g. 24.0.2]
+        - EchoTube Version: [e.g. v1.0.0, latest]
+        - Node.js Version (if applicable): [e.g. 20.10.0]
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant Logs
+      description: |
+        Please include relevant log output (use `ET_LOG_LEVEL=DEBUG` for detailed logs)
+        Remove any sensitive information like webhook URLs
+      render: shell
+      placeholder: |
+        {"timestamp":"2025-01-22T12:00:00.000Z","level":"ERROR","message":"..."}
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: |
+        Add any other context about the problem here.
+        Screenshots, error messages, etc.
+
+  - type: checkboxes
+    id: data-privacy
+    attributes:
+      label: Privacy Confirmation
+      description: Please confirm you haven't included sensitive data
+      options:
+        - label: I have removed all Discord webhook URLs from my report
+          required: true
+        - label: I have removed all personal channel IDs that should remain private
+          required: true

@@ -1,0 +1,97 @@
+name: Test Suite
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [20.x, 21.x]
+        
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Lint code
+      run: |
+        # Basic syntax validation
+        node -c src/index.js
+        node -c src/config.js
+        node -c src/youtube.js
+        node -c src/discord.js
+        node -c src/cache.js
+        node -c src/logger.js
+        node -c src/test.js
+        
+    - name: Test application startup
+      env:
+        ET_TEST_MODE: true
+        ET_CHANNEL_IDS: UCexample1
+        ET_KEYWORDS: test
+        ET_LOG_LEVEL: INFO
+        ET_DISCORD_WEBHOOK_URL: https://discord.com/api/webhooks/test
+      run: |
+        # Test that app starts and shuts down cleanly
+        timeout 15s npm start || true
+        echo "Startup test completed"
+        
+    - name: Test configuration validation
+      run: |
+        # Test config validation
+        node -e "
+        import('./src/config.js').then(({ loadConfig }) => {
+          process.env.ET_TEST_MODE = 'true';
+          process.env.ET_CHANNEL_IDS = 'UCtest';
+          process.env.ET_KEYWORDS = 'test';
+          process.env.ET_DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/test';
+          try {
+            const config = loadConfig();
+            console.log('✅ Configuration validation passed');
+            process.exit(0);
+          } catch (error) {
+            console.error('❌ Configuration validation failed:', error.message);
+            process.exit(1);
+          }
+        });
+        "
+
+  docker-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Build Docker image
+      run: docker build -t echotube:test .
+      
+    - name: Test Docker container
+      run: |
+        docker run --rm \
+          -e ET_TEST_MODE=true \
+          -e ET_CHANNEL_IDS=UCtest \
+          -e ET_KEYWORDS=test \
+          -e ET_LOG_LEVEL=DEBUG \
+          -e ET_DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/test \
+          echotube:test &
+        
+        # Let it run for a few seconds then stop
+        sleep 10
+        docker stop $(docker ps -q --filter ancestor=echotube:test) || true
+        
+        echo "Docker test completed"

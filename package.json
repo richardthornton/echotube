@@ -1,0 +1,37 @@
+{
+  "name": "echotube",
+  "version": "1.0.0",
+  "description": "Lightweight YouTube RSS monitor that posts Discord notifications for keyword-matched videos",
+  "type": "module",
+  "main": "src/index.js",
+  "engines": {
+    "node": ">=20.6.0"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "ET_TEST_MODE=true node src/index.js",
+    "dev": "ET_LOG_LEVEL=DEBUG node src/index.js"
+  },
+  "keywords": [
+    "youtube",
+    "discord",
+    "webhook",
+    "rss",
+    "monitor",
+    "bot",
+    "docker"
+  ],
+  "author": "Richard Thornton",
+  "license": "MIT",
+  "dependencies": {
+    "@rowanmanning/feed-parser": "^2.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/richardthornton/echotube.git"
+  },
+  "bugs": {
+    "url": "https://github.com/richardthornton/echotube/issues"
+  },
+  "homepage": "https://github.com/richardthornton/echotube#readme"
+}

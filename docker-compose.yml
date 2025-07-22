@@ -1,0 +1,86 @@
+# EchoTube Docker Compose Configuration Examples
+# Copy this file and customize with your configuration
+
+services:
+  # Production deployment
+  echotube:
+    image: richardthornton/echotube:latest
+    container_name: echotube
+    restart: unless-stopped
+    environment:
+      # Required: Discord webhook URL
+      ET_DISCORD_WEBHOOK_URL: "https://discord.com/api/webhooks/YOUR_WEBHOOK_URL_HERE"
+      
+      # Content sources (at least one required)
+      ET_CHANNEL_IDS: "UCexample1,UCexample2"  # Replace with actual channel IDs
+      # ET_PLAYLIST_IDS: "PLexample1,PLexample2"  # Optional playlists
+      
+      # Filtering
+      ET_KEYWORDS: "minecraft,gaming,tutorial"  # Comma-separated keywords
+      ET_MATCH_TYPE: "any"  # "any" or "all"
+      
+      # Operational settings
+      ET_POLL_INTERVAL_SECONDS: 300  # 5 minutes
+      ET_LOG_LEVEL: "INFO"  # DEBUG, INFO, WARN, ERROR
+      
+      # Cache configuration
+      ET_CACHE_FILE: "/app/cache/videos.json"
+    volumes:
+      # Persistent cache storage
+      - ./cache:/app/cache
+    healthcheck:
+      test: ["CMD", "node", "-e", "process.exit(0)"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Test mode deployment - safe testing without Discord posting
+  echotube-test:
+    image: richardthornton/echotube:latest
+    container_name: echotube-test
+    environment:
+      # Enable test mode (no Discord posting)
+      ET_TEST_MODE: "true"
+      
+      # Content sources for testing
+      ET_CHANNEL_IDS: "UCexample1"
+      ET_KEYWORDS: "minecraft"
+      ET_MATCH_TYPE: "any"
+      
+      # Debugging
+      ET_LOG_LEVEL: "DEBUG"
+    # Test mode container will run once and exit
+    restart: "no"
+    profiles:
+      - test
+
+  # Development deployment with more frequent polling
+  echotube-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: echotube-dev
+    environment:
+      ET_DISCORD_WEBHOOK_URL: "https://discord.com/api/webhooks/YOUR_DEV_WEBHOOK_URL_HERE"
+      ET_CHANNEL_IDS: "UCexample1,UCexample2"
+      ET_KEYWORDS: "minecraft,gaming"
+      ET_MATCH_TYPE: "any"
+      ET_POLL_INTERVAL_SECONDS: 60  # More frequent for development
+      ET_LOG_LEVEL: "DEBUG"
+      ET_CACHE_FILE: "/app/cache/videos-dev.json"
+      ET_DEVELOPMENT_MODE: "true"  # Enable development mode (one video per source)
+    volumes:
+      - ./cache:/app/cache
+    restart: unless-stopped
+    profiles:
+      - dev
+
+# Named volume for cache persistence (alternative to bind mount)
+volumes:
+  echotube-cache:
+    driver: local
+
+# Example using named volume instead of bind mount:
+# volumes:
+#   - echotube-cache:/app/cache
