@@ -1,6 +1,7 @@
 /**
- * Discord webhook integration with rate limiting
+ * Discord webhook integration with rate limiting and multi-webhook support
  * Implements queue-based system respecting Discord's 5 requests per 2 seconds limit
+ * Supports posting to multiple webhook URLs simultaneously
  */
 
 import { getLogger } from './logger.js';
@@ -243,6 +244,119 @@ class DiscordWebhook {
 }
 
 /**
+ * Multi-webhook manager for posting to multiple Discord servers
+ */
+class MultiDiscordWebhook {
+  constructor(webhookUrls) {
+    if (!webhookUrls || !Array.isArray(webhookUrls) || webhookUrls.length === 0) {
+      throw new Error('At least one Discord webhook URL is required');
+    }
+    
+    this.webhooks = webhookUrls.map(url => new DiscordWebhook(url));
+    logger.info(`Initialized ${this.webhooks.length} Discord webhooks`);
+  }
+
+  /**
+   * Post video notification to all configured webhooks
+   */
+  async postVideoNotification(video) {
+    const results = [];
+    
+    // Post to all webhooks in parallel
+    const promises = this.webhooks.map(async (webhook, index) => {
+      try {
+        await webhook.postVideoNotification(video);
+        logger.logDiscordPost(video.id, true, null, index + 1);
+        return { webhookIndex: index, success: true };
+      } catch (error) {
+        logger.logDiscordPost(video.id, false, error, index + 1);
+        return { webhookIndex: index, success: false, error: error.message };
+      }
+    });
+
+    const webhookResults = await Promise.allSettled(promises);
+    
+    // Process results
+    webhookResults.forEach((result, index) => {
+      if (result.status === 'fulfilled') {
+        results.push(result.value);
+      } else {
+        results.push({ 
+          webhookIndex: index, 
+          success: false, 
+          error: result.reason?.message || 'Unknown error' 
+        });
+      }
+    });
+
+    return results;
+  }
+
+  /**
+   * Post multiple video notifications to all webhooks
+   */
+  async postVideoNotifications(videos) {
+    const allResults = [];
+    
+    for (const video of videos) {
+      const webhookResults = await this.postVideoNotification(video);
+      allResults.push({
+        videoId: video.id,
+        webhookResults
+      });
+    }
+
+    return allResults;
+  }
+
+  /**
+   * Test all webhook connections
+   */
+  async testWebhooks() {
+    const results = [];
+    
+    const promises = this.webhooks.map(async (webhook, index) => {
+      try {
+        const result = await webhook.testWebhook();
+        return { webhookIndex: index + 1, ...result };
+      } catch (error) {
+        return { 
+          webhookIndex: index + 1, 
+          success: false, 
+          error: error.message 
+        };
+      }
+    });
+
+    const webhookResults = await Promise.allSettled(promises);
+    
+    webhookResults.forEach((result, index) => {
+      if (result.status === 'fulfilled') {
+        results.push(result.value);
+      } else {
+        results.push({ 
+          webhookIndex: index + 1, 
+          success: false, 
+          error: result.reason?.message || 'Unknown error' 
+        });
+      }
+    });
+
+    return results;
+  }
+
+  /**
+   * Get status of all webhook queues
+   */
+  getQueueStatus() {
+    return this.webhooks.map((webhook, index) => ({
+      webhookIndex: index + 1,
+      ...webhook.getQueueStatus()
+    }));
+  }
+}
+
+/**
  * Create Discord webhook instance
  */
 function createDiscordWebhook(webhookUrl) {
@@ -253,4 +367,11 @@ function createDiscordWebhook(webhookUrl) {
   return new DiscordWebhook(webhookUrl);
 }
 
-export { DiscordWebhook, createDiscordWebhook };
+/**
+ * Create multi-webhook instance for multiple Discord servers
+ */
+function createMultiDiscordWebhook(webhookUrls) {
+  return new MultiDiscordWebhook(webhookUrls);
+}
+
+export { DiscordWebhook, MultiDiscordWebhook, createDiscordWebhook, createMultiDiscordWebhook };

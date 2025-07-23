@@ -49,7 +49,7 @@ function validatePlaylistId(playlistId) {
  */
 function validateWebhookUrl(url) {
   if (!url) {
-    throw new ConfigError('ET_DISCORD_WEBHOOK_URL is required');
+    throw new ConfigError('Discord webhook URL is required');
   }
   
   try {
@@ -68,6 +68,22 @@ function validateWebhookUrl(url) {
 }
 
 /**
+ * Validate and parse multiple Discord webhook URLs
+ */
+function validateWebhookUrls(urlsString) {
+  if (!urlsString || urlsString.trim() === '') {
+    throw new ConfigError('ET_DISCORD_WEBHOOK_URLS is required');
+  }
+  
+  const urls = parseCommaSeparated(urlsString, 'ET_DISCORD_WEBHOOK_URLS');
+  if (urls.length === 0) {
+    throw new ConfigError('At least one Discord webhook URL must be provided');
+  }
+  
+  return urls.map(validateWebhookUrl);
+}
+
+/**
  * Validate and parse configuration from environment variables
  */
 function loadConfig() {
@@ -81,7 +97,7 @@ function loadConfig() {
     matchType: 'any',
     
     // Discord integration
-    discordWebhookUrl: null,
+    discordWebhookUrls: [],
     
     // Operational settings
     pollIntervalSeconds: 300,
@@ -116,10 +132,12 @@ function loadConfig() {
       config.matchType = matchType;
     }
 
-    // Validate Discord webhook URL (required unless in test mode)
+    // Test mode configuration
     config.testMode = process.env.ET_TEST_MODE === 'true';
+    
+    // Validate Discord webhook URLs (required unless in test mode)
     if (!config.testMode) {
-      config.discordWebhookUrl = validateWebhookUrl(process.env.ET_DISCORD_WEBHOOK_URL);
+      config.discordWebhookUrls = validateWebhookUrls(process.env.ET_DISCORD_WEBHOOK_URLS);
     }
 
     // Parse poll interval
@@ -169,6 +187,7 @@ function printConfigSummary(config) {
     playlists: config.playlistIds.length,
     keywords: config.keywords,
     matchType: config.matchType,
+    webhooks: config.discordWebhookUrls.length,
     pollInterval: `${config.pollIntervalSeconds}s`,
     logLevel: config.logLevel,
     testMode: config.testMode,

@@ -8,8 +8,8 @@ services:
     container_name: echotube
     restart: unless-stopped
     environment:
-      # Required: Discord webhook URL
-      ET_DISCORD_WEBHOOK_URL: "https://discord.com/api/webhooks/YOUR_WEBHOOK_URL_HERE"
+      # Required: Discord webhook URLs (comma-separated for multiple servers)
+      ET_DISCORD_WEBHOOK_URLS: "https://discord.com/api/webhooks/YOUR_WEBHOOK_URL_HERE"
       
       # Content sources (at least one required)
       ET_CHANNEL_IDS: "UCexample1,UCexample2"  # Replace with actual channel IDs
@@ -62,7 +62,7 @@ services:
       dockerfile: Dockerfile
     container_name: echotube-dev
     environment:
-      ET_DISCORD_WEBHOOK_URL: "https://discord.com/api/webhooks/YOUR_DEV_WEBHOOK_URL_HERE"
+      ET_DISCORD_WEBHOOK_URLS: "https://discord.com/api/webhooks/YOUR_DEV_WEBHOOK_URL_HERE"
       ET_CHANNEL_IDS: "UCexample1,UCexample2"
       ET_KEYWORDS: "minecraft,gaming"
       ET_MATCH_TYPE: "any"

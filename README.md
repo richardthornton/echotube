@@ -1,5 +1,7 @@
 # EchoTube 🎬📺
 
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-F16061?style=for-the-badge&logo=ko-fi&logoColor=white)](https://ko-fi.com/richardthornton) [![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/richardthornton)
+
 **EchoTube** is a lightweight, self-hosted bot that monitors YouTube channels or playlists for new videos containing specific keywords and posts ultra-clean notifications to Discord via webhooks.
 
 Built with modern Node.js 20+ features, zero external dependencies (except RSS parser), and production-ready security.
@@ -15,6 +17,7 @@ Built with modern Node.js 20+ features, zero external dependencies (except RSS p
 - 🎯 **Smart YouTube Monitoring** - RSS-based channel and playlist tracking
 - 🔍 **Flexible Keyword Matching** - Case-insensitive "any" or "all" matching modes  
 - 🎨 **Ultra-Clean Discord Embeds** - Minimal design with large thumbnails (1280x720)
+- 🌐 **Multi-Server Support** - Post to multiple Discord servers simultaneously
 - 🛠️ **Zero Configuration Complexity** - Pure environment variable setup
 - 📦 **Single Docker Container** - Production-ready with security hardening
 - 🧠 **Intelligent Caching** - Prevents duplicates with timestamp-based recovery
@@ -26,10 +29,10 @@ Built with modern Node.js 20+ features, zero external dependencies (except RSS p
 
 ## 🚀 Quick Start
 
-### 1. Test Your Configuration (Recommended)
+### Step 1: Test Your Setup (Recommended First Step!)
 
 ```bash
-# Safe testing without posting to Discord
+# This is completely safe - it won't post anything to Discord
 docker run --rm \
   -e ET_TEST_MODE=true \
   -e ET_CHANNEL_IDS=UCexample1 \
@@ -38,38 +41,39 @@ docker run --rm \
   richardthornton/echotube:latest
 ```
 
-### 2. Production Deployment
+### Step 2: Get Your Configuration Ready
 
+You'll need:
+- 🔗 **Discord Webhook URL(s)** - [Create one here](https://support.discord.com/hc/en-us/articles/228383668) (can use multiple for different servers)
+- 📺 **YouTube Channel IDs** - Found in URLs (format: `UCxxxxxxxxxxxxxxxxxx`)
+- 🔍 **Keywords** - What words to look for in video titles
+
+### Step 3: Run EchoTube
+
+**Option A: Docker Run (Simple)**
 ```bash
-# Docker run
 docker run -d \
   --name=echotube \
   -e ET_CHANNEL_IDS=UCexample1,UCexample2 \
   -e ET_KEYWORDS=minecraft,gaming,tutorial \
-  -e ET_DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/... \
-  -e ET_POLL_INTERVAL_SECONDS=300 \
+  -e ET_DISCORD_WEBHOOK_URLS=https://discord.com/api/webhooks/... \
   -v ./cache:/app/cache \
   richardthornton/echotube:latest
 ```
 
-### 3. Docker Compose (Recommended)
+**Option B: Docker Compose (Recommended)**
+```bash
+# Get the template files
+curl -O https://raw.githubusercontent.com/richardthornton/echotube/main/docker-compose.yml
+curl -O https://raw.githubusercontent.com/richardthornton/echotube/main/.env.example
 
-1. **Download the template:**
-   ```bash
-   curl -O https://raw.githubusercontent.com/richardthornton/echotube/main/docker-compose.yml
-   curl -O https://raw.githubusercontent.com/richardthornton/echotube/main/.env.example
-   ```
+# Set up your configuration
+cp .env.example .env
+# Edit .env with your settings
 
-2. **Configure your environment:**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your Discord webhook URL and channel IDs
-   ```
-
-3. **Start EchoTube:**
-   ```bash
-   docker-compose up -d
-   ```
+# Start EchoTube
+docker-compose up -d
+```
 
 ---
 
@@ -79,7 +83,7 @@ docker run -d \
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `ET_DISCORD_WEBHOOK_URL` | Discord webhook URL ([How to create](https://support.discord.com/hc/en-us/articles/228383668)) | `https://discord.com/api/webhooks/...` |
+| `ET_DISCORD_WEBHOOK_URLS` | Discord webhook URLs - comma-separated for multiple servers ([How to create](https://support.discord.com/hc/en-us/articles/228383668)) | `https://discord.com/api/webhooks/...` or `https://discord.com/api/webhooks/url1,https://discord.com/api/webhooks/url2` |
 | `ET_CHANNEL_IDS` | Comma-separated YouTube channel IDs | `UCexample1,UCexample2` |
 | `ET_KEYWORDS` | Comma-separated search terms | `minecraft,gaming,tutorial` |
 
@@ -126,11 +130,11 @@ EchoTube creates beautiful, minimal Discord notifications featuring:
 
 ## 🧪 Example Use Cases
 
-- **Gaming Communities**: Monitor favorite streamers for new uploads
-- **Educational Content**: Track programming tutorials or learning channels  
-- **Content Curation**: Automatically share relevant videos in community Discord servers
-- **Development Updates**: Get notified about software releases or development vlogs
-- **Entertainment**: Follow content creators across multiple channels
+- **Gaming Communities**: Monitor favorite streamers and post to multiple Discord servers
+- **Educational Content**: Track programming tutorials and share across learning communities  
+- **Content Curation**: Automatically share relevant videos in multiple community Discord servers
+- **Development Updates**: Get notified about software releases in both team and public servers
+- **Entertainment**: Follow content creators and cross-post to different interest-based servers
 
 ---
 
@@ -168,114 +172,69 @@ docker build -t echotube:custom .
 
 ---
 
-## 📊 Monitoring & Logs
+## 🐛 Need Help?
 
-EchoTube provides structured JSON logging with configurable levels:
+**Something not working?** Here's how to troubleshoot:
 
-```bash
-# View logs
-docker logs echotube
+1. **Always test first**: Use `ET_TEST_MODE=true` to validate your setup safely
+2. **Check the basics**: Verify your Discord webhook URLs are active and YouTube channel IDs are correct
+3. **Look at logs**: Run `docker logs echotube` to see what's happening (logs show webhook-specific success/failures)
+4. **Common issues**: Keywords are case-insensitive, RSS feeds only show 25 recent videos, and invalid webhook URLs will cause posting failures
 
-# Follow logs in real-time  
-docker logs -f echotube
+Still stuck? [Open an issue](https://github.com/richardthornton/echotube/issues) and we'll help you out!
 
-# Debug level logging
-docker run -e ET_LOG_LEVEL=DEBUG richardthornton/echotube
-```
+---
 
-Log entries include operation tracking, error details, and performance metrics.
+## 💖 Support This Project
+
+If EchoTube saves you time and makes your Discord server better, consider buying me a coffee! Your support helps keep this project maintained and improves it for everyone.
+
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-F16061?style=for-the-badge&logo=ko-fi&logoColor=white)](https://ko-fi.com/richardthornton) [![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/richardthornton)
+
+Every contribution, no matter how small, helps maintain and improve EchoTube for the community. Thank you! 🙏
 
 ---
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+Want to make EchoTube even better? We'd love your help!
 
-### Quick Development Setup
 1. Fork the repository
-2. Clone your fork locally
-3. Create a feature branch
-4. Make your changes
-5. Test with `ET_TEST_MODE=true`
-6. Submit a pull request
+2. Create a feature branch
+3. Make your improvements
+4. Test with `ET_TEST_MODE=true`
+5. Submit a pull request
+
+See our [Contributing Guide](CONTRIBUTING.md) for more details.
 
 ---
 
-## 🐛 Troubleshooting
+## 📋 Installation Options
 
-### Common Issues
-
-**Bot not posting videos:**
-- Verify Discord webhook URL is correct
-- Check that keywords match video titles (case-insensitive)
-- Ensure channel/playlist IDs are correct format
-- Use test mode to validate configuration
-
-**Performance issues:**
-- Reduce polling frequency if monitoring many channels
-- Use persistent cache file to improve startup time
-- Monitor logs for rate limiting messages
-
-**Docker issues:**
-- Ensure proper volume mounting for cache persistence
-- Check container logs for startup errors
-- Verify environment variables are set correctly
-
-### Getting Help
-- 📖 Check the [documentation](https://github.com/richardthornton/echotube/wiki)
-- 🐛 Report issues on [GitHub Issues](https://github.com/richardthornton/echotube/issues)
-- 💬 Join discussions in [GitHub Discussions](https://github.com/richardthornton/echotube/discussions)
-
----
-
-## 📦 Installation Methods
-
-### Docker Hub
+**Docker Hub (Recommended)**
 ```bash
 docker pull richardthornton/echotube:latest
 ```
 
-### GitHub Container Registry
+**GitHub Container Registry**
 ```bash
 docker pull ghcr.io/richardthornton/echotube:latest  
 ```
 
-### From Source
+**From Source**
 ```bash
 git clone https://github.com/richardthornton/echotube.git
-cd echotube
-npm install
-npm start
+cd echotube && npm install && npm start
 ```
-
----
-
-## 🏷️ Version Tags
-
-- `latest` - Latest stable release
-- `v1.0.0` - Specific version tags
-- `main` - Development branch (not recommended for production)
 
 ---
 
 ## 📄 License
 
-MIT © [Richard Thornton](https://github.com/richardthornton)
-
-See [LICENSE](LICENSE) for full details.
+MIT License © [Richard Thornton](https://github.com/richardthornton) - Use it however you want!
 
 ---
 
-## 🙏 Acknowledgments
+*Made with ❤️ by [Richard Thornton](https://github.com/richardthornton)*
 
-- Built with [Node.js](https://nodejs.org/) and modern container practices
-- RSS parsing powered by [@rowanmanning/feed-parser](https://github.com/rowanmanning/feed-parser)  
-- Inspired by the need for clean, minimal Discord bot notifications
-
----
-
-## ⭐ Star History
-
-If EchoTube helps you, please consider giving it a star! ⭐
-
-*EchoTube: Because YouTube notifications should be clean and simple.* ✨
+**EchoTube**: Clean YouTube notifications for Discord, the way they should be. ✨

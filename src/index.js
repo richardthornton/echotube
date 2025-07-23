@@ -8,7 +8,7 @@
 import { loadConfig, printConfigSummary, ConfigError } from './config.js';
 import { initLogger, getLogger } from './logger.js';
 import { fetchAllVideos } from './youtube.js';
-import { createDiscordWebhook } from './discord.js';
+import { createMultiDiscordWebhook } from './discord.js';
 import { createVideoCache } from './cache.js';
 import { runTestMode } from './test.js';
 
@@ -40,9 +40,9 @@ async function initialize() {
     videoCache = createVideoCache(config.cacheFile);
     await videoCache.initialize();
 
-    // Initialize Discord webhook (if not in test mode)
+    // Initialize Discord webhooks (if not in test mode)
     if (!config.testMode) {
-      discordWebhook = createDiscordWebhook(config.discordWebhookUrl);
+      discordWebhook = createMultiDiscordWebhook(config.discordWebhookUrls);
     }
 
     logger.info('EchoTube initialized successfully');
@@ -110,13 +110,35 @@ async function processVideos(videos) {
   if (!config.testMode && discordWebhook) {
     try {
       const results = await discordWebhook.postVideoNotifications(newVideos);
-      postedCount = results.filter(r => r.success).length;
       
-      const failedCount = results.length - postedCount;
-      if (failedCount > 0) {
-        logger.warn(`Some Discord notifications failed`, { 
-          failed: failedCount, 
-          successful: postedCount 
+      // Count successful posts across all webhooks
+      let totalSuccessful = 0;
+      let totalFailed = 0;
+      
+      results.forEach(videoResult => {
+        videoResult.webhookResults.forEach(webhookResult => {
+          if (webhookResult.success) {
+            totalSuccessful++;
+          } else {
+            totalFailed++;
+          }
+        });
+      });
+      
+      postedCount = results.length; // All videos were processed
+      
+      if (totalFailed > 0) {
+        logger.warn(`Some Discord webhook notifications failed`, { 
+          videosProcessed: results.length,
+          totalSuccessful,
+          totalFailed,
+          webhookCount: config.discordWebhookUrls.length
+        });
+      } else {
+        logger.info(`All Discord notifications sent successfully`, {
+          videosProcessed: results.length,
+          totalSuccessful,
+          webhookCount: config.discordWebhookUrls.length
         });
       }
     } catch (error) {
@@ -220,10 +242,12 @@ async function gracefulShutdown(signal) {
 
     // Wait for any pending Discord webhooks
     if (discordWebhook) {
-      const queueStatus = discordWebhook.getQueueStatus();
-      if (queueStatus.queueLength > 0) {
-        logger.info(`Waiting for ${queueStatus.queueLength} pending Discord notifications`);
-        // Give some time for queue to process
+      const allQueueStatuses = discordWebhook.getQueueStatus();
+      const totalQueueLength = allQueueStatuses.reduce((sum, status) => sum + status.queueLength, 0);
+      
+      if (totalQueueLength > 0) {
+        logger.info(`Waiting for ${totalQueueLength} pending Discord notifications across ${allQueueStatuses.length} webhooks`);
+        // Give some time for queues to process
         await new Promise(resolve => setTimeout(resolve, 5000));
       }
     }

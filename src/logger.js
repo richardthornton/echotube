@@ -111,17 +111,22 @@ class Logger {
   /**
    * Log Discord webhook post
    */
-  logDiscordPost(videoId, success, error = null) {
+  logDiscordPost(videoId, success, error = null, webhookIndex = null) {
+    const data = {
+      videoId,
+      operation: 'discord_post'
+    };
+    
+    if (webhookIndex !== null) {
+      data.webhookIndex = webhookIndex;
+    }
+    
     if (success) {
-      this.info('Discord notification sent', {
-        videoId,
-        operation: 'discord_post'
-      });
+      const message = webhookIndex ? `Discord notification sent to webhook ${webhookIndex}` : 'Discord notification sent';
+      this.info(message, data);
     } else {
-      this.error('Discord notification failed', error, {
-        videoId,
-        operation: 'discord_post'
-      });
+      const message = webhookIndex ? `Discord notification failed for webhook ${webhookIndex}` : 'Discord notification failed';
+      this.error(message, error, data);
     }
   }
 
