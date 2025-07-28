@@ -84,14 +84,19 @@ docker-compose up -d
 | Variable | Description | Example |
 |----------|-------------|---------|
 | `ET_DISCORD_WEBHOOK_URLS` | Discord webhook URLs - comma-separated for multiple servers ([How to create](https://support.discord.com/hc/en-us/articles/228383668)) | `https://discord.com/api/webhooks/...` or `https://discord.com/api/webhooks/url1,https://discord.com/api/webhooks/url2` |
-| `ET_CHANNEL_IDS` | Comma-separated YouTube channel IDs | `UCexample1,UCexample2` |
 | `ET_KEYWORDS` | Comma-separated search terms | `minecraft,gaming,tutorial` |
+
+### Content Sources (at least one required)
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `ET_CHANNEL_IDS` | Comma-separated YouTube channel IDs | `UCexample1,UCexample2` |
+| `ET_PLAYLIST_IDS` | Comma-separated YouTube playlist IDs | `PLexample1,PLexample2` |
 
 ### Optional Configuration
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `ET_PLAYLIST_IDS` | - | Comma-separated playlist IDs |
 | `ET_MATCH_TYPE` | `any` | `any` (match any keyword) or `all` (match all keywords) |
 | `ET_POLL_INTERVAL_SECONDS` | `300` | Poll frequency in seconds (minimum: 60) |
 | `ET_LOG_LEVEL` | `INFO` | Log level: `DEBUG`, `INFO`, `WARN`, `ERROR` |

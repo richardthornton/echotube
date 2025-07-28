@@ -38,11 +38,13 @@ docker run -d \
 
 ### Required
 - `ET_DISCORD_WEBHOOK_URLS` - Your Discord webhook URLs (comma-separated for multiple servers)
-- `ET_CHANNEL_IDS` - Comma-separated YouTube channel IDs (UCxxxxx format)
 - `ET_KEYWORDS` - Comma-separated keywords to match in video titles
 
-### Optional
+### Content Sources (at least one required)
+- `ET_CHANNEL_IDS` - Comma-separated YouTube channel IDs (UCxxxxx format)
 - `ET_PLAYLIST_IDS` - Comma-separated playlist IDs (PLxxxxx format)
+
+### Optional
 - `ET_MATCH_TYPE` - `any` (default) or `all` keyword matching
 - `ET_POLL_INTERVAL_SECONDS` - Poll frequency (default: 300, minimum: 60)
 - `ET_LOG_LEVEL` - `DEBUG`, `INFO` (default), `WARN`, `ERROR`
