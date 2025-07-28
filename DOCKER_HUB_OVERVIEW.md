@@ -55,7 +55,6 @@ docker run -d \
 ## Docker Compose Example
 
 ```yaml
-version: '3.8'
 services:
   echotube:
     image: richardthornton/echotube:latest

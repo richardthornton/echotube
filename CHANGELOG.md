@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - **Documentation**: Clarified that both `ET_CHANNEL_IDS` and `ET_PLAYLIST_IDS` are individually optional, but at least one content source must be provided
 - **Documentation Structure**: Reorganized configuration sections to better reflect the "at least one required" relationship between content sources
+- **Docker Compose**: Removed obsolete `version` field from all compose files and examples (modern Docker Compose no longer requires it)
 
 ### Added
 - Future features will be listed here
