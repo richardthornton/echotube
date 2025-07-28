@@ -8,7 +8,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Initial public release preparation
+- Future features will be listed here
+
+## [1.0.1] - 2025-01-23
+
+### Added
+- **Multi-Server Support**: Post notifications to multiple Discord servers simultaneously
+- **Enhanced Logging**: Webhook-specific success/failure tracking in logs
+- **Parallel Processing**: All webhooks receive notifications concurrently for better performance
+
+### Changed
+- **Environment Variable**: `ET_DISCORD_WEBHOOK_URL` → `ET_DISCORD_WEBHOOK_URLS` (supports comma-separated URLs)
+- **Configuration**: Updated all examples and documentation for multi-webhook support
+- **Error Handling**: Individual webhook failures don't affect others
+
+### Technical Details
+- Added `MultiDiscordWebhook` class for managing multiple webhook endpoints
+- Each webhook maintains independent rate limiting queues
+- Backward compatible: single webhook URL still supported
+- Enhanced logging shows per-webhook success/failure status
+
+### Documentation
+- Updated README with multi-server use cases and examples
+- Enhanced troubleshooting section with webhook-specific guidance  
+- Updated `.env.example` and `docker-compose.yml` with new variable format
 
 ## [1.0.0] - 2025-01-22
 
@@ -85,6 +108,7 @@ Not applicable for initial release.
 
 ## Version History
 
+- **1.0.1** - Multi-server Discord support with enhanced logging
 - **1.0.0** - Initial public release with core functionality
 - **Future releases** - Will be documented here following semantic versioning
 
